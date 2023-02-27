@@ -1,0 +1,16 @@
+[
+{
+  "modid": "recipes_export",
+  "name": "Recipes Export",
+  "description": "Recipes Export.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Someoneice"],
+  "credits": "Recipes Export is create for mcmod, export other mod's recipes in a json.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
