@@ -10,7 +10,6 @@ import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.item.crafting.ShapelessRecipes;
-import net.minecraftforge.common.crafting.IShapedRecipe;
 import net.minecraftforge.oredict.OreDictionary;
 import net.minecraftforge.oredict.OreIngredient;
 import net.minecraftforge.oredict.ShapedOreRecipe;
@@ -31,31 +30,34 @@ public class JsonHelper {
     }
 
     public static void putRecipe(IRecipe recipe) {
-        Map<Integer, AbstractData> map = new HashMap<>();
-        String name = recipe.getRegistryName().toString();
-        String type = "";
-        if (recipe instanceof ShapedRecipes) {
-            type = "minecraft:crafting_shaped";
-            map = JsonHelper.ShapedRecipesHelper((ShapedRecipes) recipe);
-        }
-        else if (recipe instanceof ShapedOreRecipe) {
-            type = "minecraft:crafting_shaped";
-            map = JsonHelper.ShapedRecipesHelper((ShapedOreRecipe) recipe);
-        }
-        else if (recipe instanceof ShapelessRecipes) {
-            type = "minecraft:crafting_shapeless";
-            map = JsonHelper.ShapelessRecipesHelper((ShapelessRecipes) recipe);
-        }
-        else if (recipe instanceof ShapelessOreRecipe){
-            type = "minecraft:crafting_shapeless";
-            map = JsonHelper.ShapelessRecipesHelper((ShapelessOreRecipe) recipe);
-        }
+        try {
+            Map<Integer, AbstractData> map = new HashMap<>();
+            String name = recipe.getRegistryName().toString();
+            String type = "";
+            RecipesMain.LOGGER.debug("Now export item: " + recipe.getRecipeOutput().getDisplayName());
+            if (recipe instanceof ShapedRecipes) {
+                type = "minecraft:crafting_shaped";
+                map = JsonHelper.ShapedRecipesHelper((ShapedRecipes) recipe);
+            } else if (recipe instanceof ShapedOreRecipe) {
+                type = "minecraft:crafting_shaped";
+                map = JsonHelper.ShapedRecipesHelper((ShapedOreRecipe) recipe);
+            } else if (recipe instanceof ShapelessRecipes) {
+                type = "minecraft:crafting_shapeless";
+                map = JsonHelper.ShapelessRecipesHelper((ShapelessRecipes) recipe);
+            } else if (recipe instanceof ShapelessOreRecipe) {
+                type = "minecraft:crafting_shapeless";
+                map = JsonHelper.ShapelessRecipesHelper((ShapelessOreRecipe) recipe);
+            }
 
-        Map<String, AbstractData> output = new HashMap<>();
-        output.put("1", new ItemData(recipe.getRecipeOutput().getItem().getRegistryName().toString(), Integer.toString(recipe.getRecipeOutput().getCount())));
+            Map<String, AbstractData> output = new HashMap<>();
+            output.put("1", new ItemData(recipe.getRecipeOutput().getItem().getRegistryName().toString(), Integer.toString(recipe.getRecipeOutput().getCount())));
 
-        JsonData jsonData = new JsonData(type, name, map, output);
-        list.get("recipes").add(jsonData);
+            JsonData jsonData = new JsonData(type, name, map, output);
+            list.get("recipes").add(jsonData);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            DataUtil.errorList.add(recipe.getRecipeOutput().getDisplayName());
+        }
     }
 
     private static Map<Integer, AbstractData> ShapedRecipesHelper(ShapedRecipes recipes) {
@@ -66,7 +68,7 @@ public class JsonHelper {
             if (recipes.recipeItems.get(i).getClass() == Ingredient.class)
                 input.put(key, new ItemData(Objects.requireNonNull(recipes.recipeItems.get(i).getMatchingStacks()[0].getItem().getRegistryName()).toString()));
             else if (recipes.recipeItems.get(i).getClass() == OreIngredient.class) {
-                String ore = getOreDict(recipes.recipeItems.get(i));
+                String ore = getOreDict((OreIngredient) recipes.recipeItems.get(i));
                 if (ore != null) input.put(key, new OreItemData(ore));
                 else throw new NullPointerException("Cannot find the oredict in a recipes when export then!");
             }
@@ -83,9 +85,9 @@ public class JsonHelper {
             if (recipes.getIngredients().get(i).getClass() == Ingredient.class)
                 input.put(key, new ItemData(Objects.requireNonNull(recipes.getIngredients().get(i).getMatchingStacks()[0].getItem().getRegistryName()).toString()));
             else if (recipes.getIngredients().get(i).getClass() == OreIngredient.class) {
-                String ore = getOreDict(recipes.getIngredients().get(i));
+                String ore = getOreDict((OreIngredient) recipes.getIngredients().get(i));
                 if (ore != null) input.put(key, new OreItemData(ore));
-                else throw new NullPointerException("Cannot find the oredict in a recipes when export then!");
+                else throw(new NullPointerException("On get item oredict have some error: " + recipes.getRecipeOutput().getDisplayName()));
             }
         }
 
@@ -99,9 +101,9 @@ public class JsonHelper {
             if (recipes.recipeItems.get(i).getClass() == Ingredient.class)
                 input.put(key, new ItemData(Objects.requireNonNull(recipes.recipeItems.get(i).getMatchingStacks()[0].getItem().getRegistryName()).toString()));
             else if (recipes.recipeItems.get(i).getClass() == OreIngredient.class) {
-                String ore = getOreDict(recipes.recipeItems.get(i));
+                String ore = getOreDict((OreIngredient) recipes.recipeItems.get(i));
                 if (ore != null) input.put(key, new OreItemData(ore));
-                else throw new NullPointerException("Cannot find the oredict in a recipes when export then!");
+                else throw(new NullPointerException("On get item oredict have some error: " + recipes.getRecipeOutput().getDisplayName()));
             }
         }
 
@@ -115,7 +117,7 @@ public class JsonHelper {
             if (recipes.getIngredients().get(i).getClass() == Ingredient.class)
                 input.put(key, new ItemData(Objects.requireNonNull(recipes.getIngredients().get(i).getMatchingStacks()[0].getItem().getRegistryName()).toString()));
             else if (recipes.getIngredients().get(i).getClass() == OreIngredient.class) {
-                String ore = getOreDict(recipes.getIngredients().get(i));
+                String ore = getOreDict((OreIngredient) recipes.getIngredients().get(i));
                 if (ore != null) input.put(key, new OreItemData(ore));
                 else throw new NullPointerException("Cannot find the oredict in a recipes when export then!");
             }
@@ -124,13 +126,15 @@ public class JsonHelper {
         return input;
     }
 
-    private static String getOreDict(Ingredient ingre) {
+    private static String getOreDict(OreIngredient ingre) {
+        if (ingre.getMatchingStacks().length < 1) return null;
         int[] oreIDs = OreDictionary.getOreIDs(ingre.getMatchingStacks()[0]);
-        if (oreIDs.length == 1)
-            return OreDictionary.getOreName(oreIDs[0]);
-        else for (int oreID : oreIDs) if (OreDictionary.getOres(OreDictionary.getOreName(oreID)).stream().allMatch(ingre)) return OreDictionary.getOreName(oreID);
+        if (oreIDs.length == 1) return OreDictionary.getOreName(oreIDs[0]);
+        else for (int oreID : oreIDs)
+            if (OreDictionary.getOres(OreDictionary.getOreName(oreID)).stream().allMatch(ingre))
+                return OreDictionary.getOreName(oreID);
 
-        return null;
+        return ingre.getMatchingStacks()[0].getItem().getRegistryName().toString();
     }
 
 

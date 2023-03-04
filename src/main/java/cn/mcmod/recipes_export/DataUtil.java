@@ -7,6 +7,7 @@ import java.util.*;
 
 public class DataUtil {
     public static final List<String> modList = new ArrayList<>();
+    public static final List<String> errorList = new ArrayList<>();
 
     public DataUtil() {
         RecipesMain.LOGGER.info("=== Start read all modid. ===");
