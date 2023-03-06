@@ -13,20 +13,4 @@ public class ItemData implements AbstractData {
         this.name = item;
         this.count = count;
     }
-
-    public void setItem(String item) {
-        this.name = item;
-    }
-
-    public void setCount(String count) {
-        this.count = count;
-    }
-
-    public String getItem() {
-        return name;
-    }
-
-    public String getCount() {
-        return count;
-    }
 }

@@ -2,6 +2,7 @@ package cn.mcmod.recipes_export;
 
 import cn.mcmod.recipes_export.data.AbstractData;
 import cn.mcmod.recipes_export.data.ItemData;
+import cn.mcmod.recipes_export.data.ItemDataWithMeta;
 import cn.mcmod.recipes_export.data.OreItemData;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -50,8 +51,8 @@ public class JsonHelper {
             }
 
             Map<String, AbstractData> output = new HashMap<>();
-            output.put("1", new ItemData(recipe.getRecipeOutput().getItem().getRegistryName().toString(), Integer.toString(recipe.getRecipeOutput().getCount())));
-
+            if (recipe.getRecipeOutput().getItemDamage() == 0) output.put("1", new ItemData(recipe.getRecipeOutput().getItem().getRegistryName().toString(), Integer.toString(recipe.getRecipeOutput().getCount())));
+            else output.put("1", new ItemDataWithMeta(recipe.getRecipeOutput().getItem().getRegistryName().toString(), Integer.toString(recipe.getRecipeOutput().getCount()), Integer.toString(recipe.getRecipeOutput().getItemDamage())));
             JsonData jsonData = new JsonData(type, name, map, output);
             list.get("recipes").add(jsonData);
         } catch (NullPointerException e) {
@@ -65,9 +66,11 @@ public class JsonHelper {
         int w = recipes.recipeWidth;
         for (int i = 0; i < recipes.recipeItems.size(); i++) {
             final int key = (i / w) * 3 + (i % w) + 1;
-            if (recipes.recipeItems.get(i).getClass() == Ingredient.class)
-                input.put(key, new ItemData(Objects.requireNonNull(recipes.recipeItems.get(i).getMatchingStacks()[0].getItem().getRegistryName()).toString()));
-            else if (recipes.recipeItems.get(i).getClass() == OreIngredient.class) {
+            if (recipes.recipeItems.get(i).getClass() == Ingredient.class) {
+                ItemStack item = recipes.recipeItems.get(i).getMatchingStacks()[0];
+                if (item.getItemDamage() == 0) input.put(key, new ItemData(Objects.requireNonNull(item.getItem().getRegistryName()).toString()));
+                else input.put(key, new ItemDataWithMeta(Objects.requireNonNull(item.getItem().getRegistryName()).toString(), Integer.toString(item.getItemDamage())));
+            } else if (recipes.recipeItems.get(i).getClass() == OreIngredient.class) {
                 String ore = getOreDict((OreIngredient) recipes.recipeItems.get(i));
                 if (ore != null) input.put(key, new OreItemData(ore));
                 else throw new NullPointerException("Cannot find the oredict in a recipes when export then!");
@@ -82,9 +85,11 @@ public class JsonHelper {
         int w = recipes.getRecipeWidth();
         for (int i = 0; i < recipes.getIngredients().size(); i++) {
             final int key = (i / w) * 3 + (i % w) + 1;
-            if (recipes.getIngredients().get(i).getClass() == Ingredient.class)
-                input.put(key, new ItemData(Objects.requireNonNull(recipes.getIngredients().get(i).getMatchingStacks()[0].getItem().getRegistryName()).toString()));
-            else if (recipes.getIngredients().get(i).getClass() == OreIngredient.class) {
+            if (recipes.getIngredients().get(i).getClass() == Ingredient.class) {
+                ItemStack item = recipes.getIngredients().get(i).getMatchingStacks()[0];
+                if (item.getItemDamage() == 0) input.put(key, new ItemData(Objects.requireNonNull(item.getItem().getRegistryName()).toString()));
+                else input.put(key, new ItemDataWithMeta(Objects.requireNonNull(item.getItem().getRegistryName()).toString(), Integer.toString(item.getItemDamage())));
+            } else if (recipes.getIngredients().get(i).getClass() == OreIngredient.class) {
                 String ore = getOreDict((OreIngredient) recipes.getIngredients().get(i));
                 if (ore != null) input.put(key, new OreItemData(ore));
                 else throw(new NullPointerException("On get item oredict have some error: " + recipes.getRecipeOutput().getDisplayName()));
@@ -98,9 +103,11 @@ public class JsonHelper {
         Map<Integer, AbstractData> input = new HashMap<>();
         for (int i = 0; i < recipes.recipeItems.size(); i++) {
             final int key = i + 1;
-            if (recipes.recipeItems.get(i).getClass() == Ingredient.class)
-                input.put(key, new ItemData(Objects.requireNonNull(recipes.recipeItems.get(i).getMatchingStacks()[0].getItem().getRegistryName()).toString()));
-            else if (recipes.recipeItems.get(i).getClass() == OreIngredient.class) {
+            if (recipes.recipeItems.get(i).getClass() == Ingredient.class) {
+                ItemStack item = recipes.recipeItems.get(i).getMatchingStacks()[0];
+                if (item.getItemDamage() == 0) input.put(key, new ItemData(Objects.requireNonNull(item.getItem().getRegistryName()).toString()));
+                else input.put(key, new ItemDataWithMeta(Objects.requireNonNull(item.getItem().getRegistryName()).toString(), Integer.toString(item.getItemDamage())));
+            } else if (recipes.recipeItems.get(i).getClass() == OreIngredient.class) {
                 String ore = getOreDict((OreIngredient) recipes.recipeItems.get(i));
                 if (ore != null) input.put(key, new OreItemData(ore));
                 else throw(new NullPointerException("On get item oredict have some error: " + recipes.getRecipeOutput().getDisplayName()));
@@ -114,9 +121,11 @@ public class JsonHelper {
         Map<Integer, AbstractData> input = new HashMap<>();
         for (int i = 0; i < recipes.getIngredients().size(); i++) {
             final int key = i + 1;
-            if (recipes.getIngredients().get(i).getClass() == Ingredient.class)
-                input.put(key, new ItemData(Objects.requireNonNull(recipes.getIngredients().get(i).getMatchingStacks()[0].getItem().getRegistryName()).toString()));
-            else if (recipes.getIngredients().get(i).getClass() == OreIngredient.class) {
+            if (recipes.getIngredients().get(i).getClass() == Ingredient.class) {
+                ItemStack item = recipes.getIngredients().get(i).getMatchingStacks()[0];
+                if (item.getItemDamage() == 0) input.put(key, new ItemData(Objects.requireNonNull(item.getItem().getRegistryName()).toString()));
+                else input.put(key, new ItemDataWithMeta(Objects.requireNonNull(item.getItem().getRegistryName()).toString(), Integer.toString(item.getItemDamage())));
+            } else if (recipes.getIngredients().get(i).getClass() == OreIngredient.class) {
                 String ore = getOreDict((OreIngredient) recipes.getIngredients().get(i));
                 if (ore != null) input.put(key, new OreItemData(ore));
                 else throw new NullPointerException("Cannot find the oredict in a recipes when export then!");
