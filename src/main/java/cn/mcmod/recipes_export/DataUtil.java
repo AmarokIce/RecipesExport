@@ -18,7 +18,7 @@ public class DataUtil {
         RecipesMain.LOGGER.info(modList.size() + " Mods get!");
     }
 
-    public static String getModinFromRegisterName(String str) {
+    public static String getModidFromRegisterName(String str) {
         return str.substring(0, str.indexOf(":"));
     }
 

@@ -4,6 +4,7 @@ import cn.mcmod.recipes_export.data.AbstractData;
 import cn.mcmod.recipes_export.data.ItemData;
 import cn.mcmod.recipes_export.data.ItemDataWithMeta;
 import cn.mcmod.recipes_export.data.OreItemData;
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.minecraft.item.ItemStack;
@@ -24,13 +25,9 @@ import java.util.*;
 public class JsonHelper {
 
     /* Recipes Export */
-    static Map<String, List<JsonData>> list = new HashMap<>();
+    List<JsonData> list = Lists.newArrayList();
 
-    public static void init() {
-        list.put("recipes", new ArrayList<>());
-    }
-
-    public static void putRecipe(IRecipe recipe) {
+    public void putRecipe(IRecipe recipe) {
         try {
             Map<Integer, AbstractData> map = new HashMap<>();
             String name = recipe.getRegistryName().toString();
@@ -38,30 +35,30 @@ public class JsonHelper {
             RecipesMain.LOGGER.debug("Now export item: " + recipe.getRecipeOutput().getDisplayName());
             if (recipe instanceof ShapedRecipes) {
                 type = "minecraft:crafting_shaped";
-                map = JsonHelper.ShapedRecipesHelper((ShapedRecipes) recipe);
+                map = this.ShapedRecipesHelper((ShapedRecipes) recipe);
             } else if (recipe instanceof ShapedOreRecipe) {
                 type = "minecraft:crafting_shaped";
-                map = JsonHelper.ShapedRecipesHelper((ShapedOreRecipe) recipe);
+                map = this.ShapedRecipesHelper((ShapedOreRecipe) recipe);
             } else if (recipe instanceof ShapelessRecipes) {
                 type = "minecraft:crafting_shapeless";
-                map = JsonHelper.ShapelessRecipesHelper((ShapelessRecipes) recipe);
+                map = this.ShapelessRecipesHelper((ShapelessRecipes) recipe);
             } else if (recipe instanceof ShapelessOreRecipe) {
                 type = "minecraft:crafting_shapeless";
-                map = JsonHelper.ShapelessRecipesHelper((ShapelessOreRecipe) recipe);
+                map = this.ShapelessRecipesHelper((ShapelessOreRecipe) recipe);
             }
 
             Map<String, AbstractData> output = new HashMap<>();
             if (recipe.getRecipeOutput().getItemDamage() == 0) output.put("1", new ItemData(recipe.getRecipeOutput().getItem().getRegistryName().toString(), Integer.toString(recipe.getRecipeOutput().getCount())));
             else output.put("1", new ItemDataWithMeta(recipe.getRecipeOutput().getItem().getRegistryName().toString(), Integer.toString(recipe.getRecipeOutput().getCount()), Integer.toString(recipe.getRecipeOutput().getItemDamage())));
             JsonData jsonData = new JsonData(type, name, map, output);
-            list.get("recipes").add(jsonData);
+            list.add(jsonData);
         } catch (NullPointerException e) {
             e.printStackTrace();
             DataUtil.errorList.add(recipe.getRecipeOutput().getDisplayName());
         }
     }
 
-    private static Map<Integer, AbstractData> ShapedRecipesHelper(ShapedRecipes recipes) {
+    private Map<Integer, AbstractData> ShapedRecipesHelper(ShapedRecipes recipes) {
         Map<Integer, AbstractData> input = new HashMap<>();
         int w = recipes.recipeWidth;
         for (int i = 0; i < recipes.recipeItems.size(); i++) {
@@ -80,7 +77,7 @@ public class JsonHelper {
         return input;
     }
 
-    private static Map<Integer, AbstractData> ShapedRecipesHelper(ShapedOreRecipe recipes) {
+    private Map<Integer, AbstractData> ShapedRecipesHelper(ShapedOreRecipe recipes) {
         Map<Integer, AbstractData> input = new HashMap<>();
         int w = recipes.getRecipeWidth();
         for (int i = 0; i < recipes.getIngredients().size(); i++) {
@@ -99,7 +96,7 @@ public class JsonHelper {
         return input;
     }
 
-    private static Map<Integer, AbstractData> ShapelessRecipesHelper(ShapelessRecipes recipes) {
+    private Map<Integer, AbstractData> ShapelessRecipesHelper(ShapelessRecipes recipes) {
         Map<Integer, AbstractData> input = new HashMap<>();
         for (int i = 0; i < recipes.recipeItems.size(); i++) {
             final int key = i + 1;
@@ -117,7 +114,7 @@ public class JsonHelper {
         return input;
     }
 
-    private static Map<Integer, AbstractData> ShapelessRecipesHelper(ShapelessOreRecipe recipes) {
+    private Map<Integer, AbstractData> ShapelessRecipesHelper(ShapelessOreRecipe recipes) {
         Map<Integer, AbstractData> input = new HashMap<>();
         for (int i = 0; i < recipes.getIngredients().size(); i++) {
             final int key = i + 1;
@@ -135,7 +132,7 @@ public class JsonHelper {
         return input;
     }
 
-    private static String getOreDict(OreIngredient ingre) {
+    private String getOreDict(OreIngredient ingre) {
         if (ingre.getMatchingStacks().length < 1) return null;
         int[] oreIDs = OreDictionary.getOreIDs(ingre.getMatchingStacks()[0]);
         if (oreIDs.length == 1) return OreDictionary.getOreName(oreIDs[0]);
@@ -148,7 +145,7 @@ public class JsonHelper {
 
 
     /* Smelting Export */
-    public static void addSmeltingRecipes(ItemStack input, ItemStack output) {
+    public void addSmeltingRecipes(ItemStack input, ItemStack output) {
         String type = "minecraft:smelting";
         String name = output.getItem().getRegistryName().toString();
 
@@ -157,10 +154,10 @@ public class JsonHelper {
         inputMap.put("1", new ItemData(input.getItem().getRegistryName().toString()));
         outputMap.put("1", new ItemData(output.getItem().getRegistryName().toString(), Integer.toString(output.getCount())));
 
-        list.get("recipes").add(new JsonData(type, name, inputMap, outputMap));
+        list.add(new JsonData(type, name, inputMap, outputMap));
     }
 
-    public static void finish(String modid) {
+    public void finish(String modid) {
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             File file = new File(System.getProperty("user.dir") + File.separator + "export", modid + "_recipe.json");
@@ -177,7 +174,7 @@ public class JsonHelper {
         }
     }
 
-    private static class JsonData implements AbstractData {
+    private class JsonData implements AbstractData {
         String type;
         String name;
         Map<Integer, AbstractData> input;

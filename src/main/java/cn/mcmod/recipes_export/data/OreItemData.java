@@ -8,20 +8,4 @@ public class OreItemData implements AbstractData{
         this.oredict = oredict;
         this.count = "1";
     }
-
-    public String getOredict() {
-        return oredict;
-    }
-
-    public void setOredict(String oredict) {
-        this.oredict = oredict;
-    }
-
-    public String getCount() {
-        return count;
-    }
-
-    public void setCount(String count) {
-        this.count = count;
-    }
 }
