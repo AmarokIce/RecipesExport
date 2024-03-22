@@ -8,9 +8,9 @@
     "url": "",
     "updateUrl": "",
     "authorList": ["Someoneice"],
-    "credits": "",
+    "credits": "Someoneice",
     "logoFile": "",
     "screenshots": [],
-    "dependencies": [""]
+    "dependencies": []
   }
 ]
